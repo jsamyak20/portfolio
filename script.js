@@ -151,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
         revealOnScroll.observe(el);
     });
 
-    // --- Form Submission Mock ---
+    // --- Form Submission with SmtpJS ---
     const contactForm = document.getElementById('contactForm');
     if (contactForm) {
         contactForm.addEventListener('submit', (e) => {
@@ -162,18 +162,46 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.innerHTML = 'Sending... <i class="fas fa-spinner fa-spin"></i>';
             btn.style.opacity = '0.8';
             
-            // Simulate API call
-            setTimeout(() => {
-                btn.innerHTML = 'Message Sent! <i class="fas fa-check"></i>';
-                btn.style.background = '#00b894';
-                contactForm.reset();
-                
-                setTimeout(() => {
-                    btn.innerHTML = originalText;
-                    btn.style.background = '';
-                    btn.style.opacity = '1';
-                }, 3000);
-            }, 1500);
+            // Get form values
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const subject = document.getElementById('subject').value;
+            const message = document.getElementById('message').value;
+
+            // Send Email using SmtpJS
+            Email.send({
+                Host: "smtp.gmail.com",
+                Username: "jsamyak787@gmail.com",
+                Password: "moxa wnes pwrm lclq",
+                To: "jsamyak787@gmail.com",
+                From: "jsamyak787@gmail.com", // Gmail requires From to be the authenticated email, but we put the user's email in the body
+                Subject: `Portfolio Contact: ${subject} - from ${name}`,
+                Body: `<h3>New Message from Portfolio Website</h3>
+                       <p><strong>Name:</strong> ${name}</p>
+                       <p><strong>Email:</strong> ${email}</p>
+                       <p><strong>Subject:</strong> ${subject}</p>
+                       <p><strong>Message:</strong><br>${message.replace(/\\n/g, '<br>')}</p>`
+            }).then(
+                function(response) {
+                    if (response === 'OK') {
+                        btn.innerHTML = 'Message Sent! <i class="fas fa-check"></i>';
+                        btn.style.background = '#00b894';
+                        contactForm.reset();
+                    } else {
+                        btn.innerHTML = 'Failed to Send <i class="fas fa-times"></i>';
+                        btn.style.background = '#d63031';
+                        // SmtpJS might return an error message
+                        console.error("Email Error:", response);
+                        alert("There was an error sending your message. Please try again later.");
+                    }
+                    
+                    setTimeout(() => {
+                        btn.innerHTML = originalText;
+                        btn.style.background = '';
+                        btn.style.opacity = '1';
+                    }, 4000);
+                }
+            );
         });
     }
 });
